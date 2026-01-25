@@ -26,23 +26,22 @@ export function ContactSection() {
               <p className="info-label flex items-center gap-2">
                 <Phone className="w-4 h-4" /> Phone
               </p>
-              <p className="info-value">+91 11 2345 6789</p>
+              <p className="info-value text-cream-muted italic">Your phone number</p>
             </div>
 
             <div>
               <p className="info-label flex items-center gap-2">
                 <Mail className="w-4 h-4" /> Email
               </p>
-              <p className="info-value">hello@greenbridge.in</p>
+              <p className="info-value text-cream-muted italic">Your email address</p>
             </div>
 
             <div>
               <p className="info-label flex items-center gap-2">
                 <MapPin className="w-4 h-4" /> Address
               </p>
-              <p className="info-value">
-                Civic Centre, Minto Road<br />
-                New Delhi, 110002
+              <p className="info-value text-cream-muted italic">
+                Your address
               </p>
             </div>
           </div>
@@ -87,7 +86,6 @@ export function ContactSection() {
             © 2026 GreenBridge. Built for Smart India Hackathon.
           </p>
           <div className="flex items-center gap-2 text-cream">
-            <span className="text-xl">🌱</span>
             <span className="font-display text-lg italic">GreenBridge</span>
           </div>
         </div>

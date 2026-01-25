@@ -10,12 +10,12 @@ const processSteps = [
 ];
 
 const wasteCategories = [
-  { type: "Reclaimed Wood", quantity: "650 MT", icon: "🪵" },
-  { type: "Metal / Steel", quantity: "520 MT", icon: "⚙️" },
-  { type: "Plastic / PET", quantity: "380 MT", icon: "♻️" },
-  { type: "Construction Debris", quantity: "450 MT", icon: "🧱" },
-  { type: "Textile / Fabric", quantity: "470 MT", icon: "🧵" },
-  { type: "Electronic Waste", quantity: "177 MT", icon: "💻" },
+  { type: "Reclaimed Wood", quantity: "650 MT" },
+  { type: "Metal / Steel", quantity: "520 MT" },
+  { type: "Plastic / PET", quantity: "380 MT" },
+  { type: "Construction Debris", quantity: "450 MT" },
+  { type: "Textile / Fabric", quantity: "470 MT" },
+  { type: "Electronic Waste", quantity: "177 MT" },
 ];
 
 export function ProcessSection() {
@@ -72,7 +72,6 @@ export function ProcessSection() {
                 className="glass-card text-center animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <span className="text-4xl mb-4 block">{category.icon}</span>
                 <p className="font-display text-lg text-cream mb-1">{category.type}</p>
                 <p className="font-body text-2xl font-light text-cream">{category.quantity}</p>
               </div>

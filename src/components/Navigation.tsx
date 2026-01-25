@@ -27,7 +27,6 @@ export function Navigation() {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <a href="#home" className="font-display text-2xl text-cream flex items-center gap-2">
-          <span className="text-3xl">🌱</span>
           <span className="italic">GreenBridge</span>
         </a>
 
