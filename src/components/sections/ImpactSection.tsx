@@ -2,8 +2,7 @@ import impactBg from "@/assets/impact-bg.jpg";
 
 const successStories = [
   {
-    emoji: "🛋️",
-    title: "Chennai Landfill → Furniture",
+    title: "Chennai Landfill to Furniture",
     stats: [
       { value: "1,200 MT", label: "Wood Used" },
       { value: "5,000", label: "Items Made" },
@@ -12,8 +11,7 @@ const successStories = [
     ],
   },
   {
-    emoji: "♻️",
-    title: "Delhi Debris → Roads",
+    title: "Delhi Debris to Roads",
     stats: [
       { value: "3,500 MT", label: "Debris Used" },
       { value: "15 km", label: "Roads Built" },
@@ -22,8 +20,7 @@ const successStories = [
     ],
   },
   {
-    emoji: "🏭",
-    title: "Plastic → Housing",
+    title: "Plastic to Housing",
     stats: [
       { value: "800 MT", label: "Plastic Used" },
       { value: "2,400", label: "Homes Built" },
@@ -74,7 +71,6 @@ export function ImpactSection() {
               className="glass-card animate-fade-up"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
-              <span className="text-5xl mb-6 block">{story.emoji}</span>
               <h3 className="font-display text-2xl text-cream mb-6">{story.title}</h3>
               <div className="grid grid-cols-2 gap-4">
                 {story.stats.map((stat, sIndex) => (
