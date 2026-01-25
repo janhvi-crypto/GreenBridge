@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { 
   LayoutDashboard, 
-  Search, 
-  Calculator, 
-  FileText, 
-  TrendingUp,
+  Package, 
+  FileCheck, 
+  ClipboardCheck,
+  BarChart3,
   Menu,
   LogOut,
-  X
+  X,
+  Landmark
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
-import { MatchingEngine } from "@/components/dashboard/MatchingEngine";
-import { ROICalculator } from "@/components/dashboard/ROICalculator";
-import { GovHub } from "@/components/dashboard/GovHub";
-import { Analytics } from "@/components/dashboard/Analytics";
+import { GovOverview } from "@/components/government/GovOverview";
+import { InventoryManagement } from "@/components/government/InventoryManagement";
+import { CollaborationApprovals } from "@/components/government/CollaborationApprovals";
+import { ComplianceTracking } from "@/components/government/ComplianceTracking";
+import { GovAnalytics } from "@/components/government/GovAnalytics";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "matching", label: "Matching Engine", icon: Search },
-  { id: "calculator", label: "ROI Calculator", icon: Calculator },
-  { id: "govhub", label: "Gov Hub", icon: FileText },
-  { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "inventory", label: "Inventory", icon: Package },
+  { id: "approvals", label: "Approvals", icon: FileCheck },
+  { id: "compliance", label: "Compliance", icon: ClipboardCheck },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-export default function Dashboard() {
+export default function GovernmentDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,17 +43,17 @@ export default function Dashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
-        return <DashboardOverview />;
-      case "matching":
-        return <MatchingEngine />;
-      case "calculator":
-        return <ROICalculator />;
-      case "govhub":
-        return <GovHub />;
+        return <GovOverview />;
+      case "inventory":
+        return <InventoryManagement />;
+      case "approvals":
+        return <CollaborationApprovals />;
+      case "compliance":
+        return <ComplianceTracking />;
       case "analytics":
-        return <Analytics />;
+        return <GovAnalytics />;
       default:
-        return <DashboardOverview />;
+        return <GovOverview />;
     }
   };
 
@@ -151,7 +152,7 @@ export default function Dashboard() {
                 {navItems.find((item) => item.id === activeTab)?.label}
               </h1>
               <p className="font-body text-sm text-cream/60">
-                Partner Dashboard
+                Government Dashboard
               </p>
             </div>
 
@@ -164,11 +165,14 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="font-body text-sm text-cream">Welcome, Partner</p>
-                <p className="font-body text-xs text-cream/60">Your Company</p>
+                <p className="font-body text-sm text-cream">Government Portal</p>
+                <p className="font-body text-xs text-cream/60">
+                  {/* Placeholder for department name */}
+                  Your Department
+                </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center">
-                <span className="font-display text-cream">P</span>
+                <Landmark className="w-5 h-5 text-cream" />
               </div>
             </div>
           </div>
