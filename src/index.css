@@ -2,95 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* GreenBridge Design System - Landfill Management Platform */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Primary Green Palette */
+    --primary: 152 78% 24%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary Light Green */
+    --secondary: 152 70% 36%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Backgrounds */
+    --background: 150 20% 97%;
+    --foreground: 152 40% 10%;
+    
+    /* Cards with soft gradient effect */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 152 40% 10%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 152 40% 10%;
+    
+    /* Muted tones */
+    --muted: 150 15% 92%;
+    --muted-foreground: 152 20% 40%;
+    
+    /* Accent - Soft beige/cream */
+    --accent: 45 40% 94%;
+    --accent-foreground: 152 78% 24%;
+    
+    /* Destructive - Alert Red */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Warning Yellow */
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 10%;
+    
+    /* Success */
+    --success: 152 70% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Borders */
+    --border: 150 20% 85%;
+    --input: 150 20% 85%;
+    --ring: 152 78% 24%;
+    
+    --radius: 0.75rem;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Chart Colors */
+    --chart-wood: 30 59% 31%;
+    --chart-metal: 210 9% 50%;
+    --chart-plastic: 225 73% 57%;
+    --chart-construction: 43 74% 49%;
+    --chart-textile: 330 100% 71%;
+    --chart-electronic: 11 100% 63%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(152, 78%, 24%) 0%, hsl(152, 70%, 36%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(152, 78%, 20%) 0%, hsl(152, 70%, 32%) 50%, hsl(152, 60%, 40%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(200, 40%, 97%) 0%, hsl(0, 0%, 96%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(152, 70%, 36%) 0%, hsl(152, 60%, 45%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 40px hsl(152 70% 36% / 0.3);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 152 78% 24%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 152 78% 24%;
+    --sidebar-accent: 152 70% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 152 60% 30%;
+    --sidebar-ring: 0 0% 100%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 152 40% 6%;
+    --foreground: 150 20% 95%;
+    
+    --card: 152 35% 10%;
+    --card-foreground: 150 20% 95%;
+    
+    --popover: 152 35% 10%;
+    --popover-foreground: 150 20% 95%;
+    
+    --primary: 152 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 152 50% 25%;
+    --secondary-foreground: 150 20% 95%;
+    
+    --muted: 152 30% 15%;
+    --muted-foreground: 150 15% 60%;
+    
+    --accent: 152 40% 18%;
+    --accent-foreground: 150 20% 95%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 152 30% 20%;
+    --input: 152 30% 20%;
+    --ring: 152 70% 45%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 152 40% 8%;
+    --sidebar-foreground: 150 20% 95%;
+    --sidebar-primary: 152 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 152 40% 15%;
+    --sidebar-accent-foreground: 150 20% 95%;
+    --sidebar-border: 152 30% 20%;
+    --sidebar-ring: 152 70% 45%;
   }
 }
 
@@ -100,6 +133,201 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Gradient Backgrounds */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .bg-gradient-success {
+    background: var(--gradient-success);
+  }
+
+  /* Glass Effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  /* Card Hover Effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+
+  /* Metric Cards */
+  .metric-card {
+    @apply relative overflow-hidden rounded-xl p-6 bg-gradient-card shadow-md card-hover;
+  }
+
+  .metric-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-1 bg-gradient-primary;
+  }
+
+  /* Navigation Button Styles */
+  .nav-button {
+    @apply px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out;
+  }
+
+  .nav-button-active {
+    @apply bg-primary text-primary-foreground shadow-lg;
+  }
+
+  .nav-button-inactive {
+    @apply bg-white/10 text-white hover:bg-white/20 hover:-translate-y-0.5;
+  }
+
+  /* Status Badges */
+  .badge-approved {
+    @apply bg-success text-success-foreground px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .badge-pending {
+    @apply bg-warning text-warning-foreground px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .badge-revision {
+    @apply bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+  }
+
+  /* Animated Counter */
+  .counter-animate {
+    @apply tabular-nums font-bold;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      text-shadow: 0 0 10px hsl(152 70% 36% / 0.5);
+    }
+    50% {
+      text-shadow: 0 0 20px hsl(152 70% 36% / 0.8);
+    }
+  }
+
+  /* Tab Content Animation */
+  .tab-content-enter {
+    animation: slideIn 0.3s ease-out forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Story Cards */
+  .story-card {
+    @apply relative overflow-hidden rounded-2xl p-6 bg-gradient-card shadow-lg card-hover;
+  }
+
+  .story-card::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-1.5 bg-gradient-primary;
+  }
+
+  /* Form Inputs */
+  .form-input {
+    @apply w-full px-4 py-3 rounded-lg border border-border bg-white/50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply px-6 py-3 rounded-lg font-semibold text-white bg-gradient-primary shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200;
+  }
+
+  /* Waste Type Colors */
+  .waste-wood { @apply bg-amber-700; }
+  .waste-metal { @apply bg-slate-500; }
+  .waste-plastic { @apply bg-blue-500; }
+  .waste-construction { @apply bg-yellow-600; }
+  .waste-textile { @apply bg-pink-400; }
+  .waste-electronic { @apply bg-orange-500; }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-counter {
+    animation: counterPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes counterPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
   }
 }
