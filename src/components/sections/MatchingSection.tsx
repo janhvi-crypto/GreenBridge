@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import sectionBg from "@/assets/section-bg.jpg";
 
@@ -13,6 +14,7 @@ const wasteTypes = [
 
 export function MatchingSection() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
@@ -39,17 +41,14 @@ export function MatchingSection() {
     setIsSubmitting(false);
     
     toast({
-      title: "Registration Submitted",
-      description: "We'll match you with available materials within 48 hours.",
+      title: "Registration Successful",
+      description: "Redirecting to your dashboard...",
     });
 
-    setFormData({
-      companyName: "",
-      email: "",
-      wasteType: "",
-      quantity: "",
-      contactPerson: "",
-    });
+    // Redirect to dashboard after successful registration
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1000);
   };
 
   return (
