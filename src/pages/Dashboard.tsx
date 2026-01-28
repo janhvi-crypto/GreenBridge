@@ -1,27 +1,36 @@
 import { useState } from "react";
 import { 
   LayoutDashboard, 
+  ShoppingCart,
   Search, 
   Calculator, 
+  Package,
   FileText, 
   TrendingUp,
+  Settings,
   Menu,
   LogOut,
   X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { Marketplace } from "@/components/dashboard/Marketplace";
 import { MatchingEngine } from "@/components/dashboard/MatchingEngine";
 import { ROICalculator } from "@/components/dashboard/ROICalculator";
+import { OrderManagement } from "@/components/dashboard/OrderManagement";
 import { GovHub } from "@/components/dashboard/GovHub";
-import { Analytics } from "@/components/dashboard/Analytics";
+import { ImpactDashboard } from "@/components/dashboard/ImpactDashboard";
+import { AccountSettings } from "@/components/dashboard/AccountSettings";
 
 const navItems = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "overview", label: "Dashboard", icon: LayoutDashboard },
+  { id: "marketplace", label: "Marketplace", icon: ShoppingCart },
   { id: "matching", label: "Matching Engine", icon: Search },
   { id: "calculator", label: "ROI Calculator", icon: Calculator },
-  { id: "govhub", label: "Gov Hub", icon: FileText },
-  { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "orders", label: "Order Management", icon: Package },
+  { id: "govhub", label: "Gov Collaboration", icon: FileText },
+  { id: "impact", label: "Impact Dashboard", icon: TrendingUp },
+  { id: "settings", label: "Account & Settings", icon: Settings },
 ];
 
 export default function Dashboard() {
@@ -43,14 +52,20 @@ export default function Dashboard() {
     switch (activeTab) {
       case "overview":
         return <DashboardOverview />;
+      case "marketplace":
+        return <Marketplace />;
       case "matching":
         return <MatchingEngine />;
       case "calculator":
         return <ROICalculator />;
+      case "orders":
+        return <OrderManagement />;
       case "govhub":
         return <GovHub />;
-      case "analytics":
-        return <Analytics />;
+      case "impact":
+        return <ImpactDashboard />;
+      case "settings":
+        return <AccountSettings />;
       default:
         return <DashboardOverview />;
     }
@@ -99,8 +114,8 @@ export default function Dashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="space-y-1">
             {navItems.map((item) => (
               <li key={item.id}>
                 <button

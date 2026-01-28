@@ -2,9 +2,11 @@ import { useState } from "react";
 import { 
   LayoutDashboard, 
   Package, 
+  Users,
+  DollarSign,
   FileCheck, 
   ClipboardCheck,
-  BarChart3,
+  FileText,
   Menu,
   LogOut,
   X,
@@ -13,16 +15,20 @@ import {
 import { useNavigate } from "react-router-dom";
 import { GovOverview } from "@/components/government/GovOverview";
 import { InventoryManagement } from "@/components/government/InventoryManagement";
-import { CollaborationApprovals } from "@/components/government/CollaborationApprovals";
-import { ComplianceTracking } from "@/components/government/ComplianceTracking";
-import { GovAnalytics } from "@/components/government/GovAnalytics";
+import { CompanyRequests } from "@/components/government/CompanyRequests";
+import { FinancialAnalytics } from "@/components/government/FinancialAnalytics";
+import { ApprovalWorkflows } from "@/components/government/ApprovalWorkflows";
+import { ComplianceAudits } from "@/components/government/ComplianceAudits";
+import { ReportsExport } from "@/components/government/ReportsExport";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "inventory", label: "Inventory", icon: Package },
-  { id: "approvals", label: "Approvals", icon: FileCheck },
-  { id: "compliance", label: "Compliance", icon: ClipboardCheck },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "inventory", label: "Inventory Management", icon: Package },
+  { id: "requests", label: "Company Requests", icon: Users },
+  { id: "financial", label: "Financial & Analytics", icon: DollarSign },
+  { id: "approvals", label: "Approval Workflows", icon: FileCheck },
+  { id: "compliance", label: "Compliance & Audits", icon: ClipboardCheck },
+  { id: "reports", label: "Reports & Export", icon: FileText },
 ];
 
 export default function GovernmentDashboard() {
@@ -46,12 +52,16 @@ export default function GovernmentDashboard() {
         return <GovOverview />;
       case "inventory":
         return <InventoryManagement />;
+      case "requests":
+        return <CompanyRequests />;
+      case "financial":
+        return <FinancialAnalytics />;
       case "approvals":
-        return <CollaborationApprovals />;
+        return <ApprovalWorkflows />;
       case "compliance":
-        return <ComplianceTracking />;
-      case "analytics":
-        return <GovAnalytics />;
+        return <ComplianceAudits />;
+      case "reports":
+        return <ReportsExport />;
       default:
         return <GovOverview />;
     }
@@ -100,8 +110,8 @@ export default function GovernmentDashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="space-y-1">
             {navItems.map((item) => (
               <li key={item.id}>
                 <button
@@ -167,8 +177,7 @@ export default function GovernmentDashboard() {
               <div className="text-right hidden sm:block">
                 <p className="font-body text-sm text-cream">Government Portal</p>
                 <p className="font-body text-xs text-cream/60">
-                  {/* Placeholder for department name */}
-                  Your Department
+                  Delhi Municipal Corporation
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center">
