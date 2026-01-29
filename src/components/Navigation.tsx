@@ -6,6 +6,7 @@ const navItems = [
   { label: "Home", href: "#home" },
   { label: "Process", href: "#process" },
   { label: "Impact", href: "#impact" },
+  { label: "Shop", href: "/shop", isRoute: true },
   { label: "Partner", href: "#partner" },
   { label: "Contact", href: "#contact" },
 ];
@@ -46,9 +47,11 @@ export function Navigation() {
     };
   }, [mobileMenuOpen]);
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (href: string, isRoute?: boolean) => {
     setMobileMenuOpen(false);
-    if (href.startsWith("#")) {
+    if (isRoute) {
+      navigate(href);
+    } else if (href.startsWith("#")) {
       const element = document.querySelector(href);
       element?.scrollIntoView({ behavior: "smooth" });
     }
@@ -69,13 +72,23 @@ export function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="nav-link"
-              >
-                {item.label}
-              </a>
+              item.isRoute ? (
+                <button
+                  key={item.href}
+                  onClick={() => navigate(item.href)}
+                  className="nav-link"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="nav-link"
+                >
+                  {item.label}
+                </a>
+              )
             ))}
           </div>
 
@@ -133,14 +146,24 @@ export function Navigation() {
           {/* Mobile Nav Links */}
           <nav className="space-y-4">
             {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => handleNavClick(item.href)}
-                className="block font-body text-lg text-cream/80 hover:text-cream py-2 border-b border-cream/10 transition-colors"
-              >
-                {item.label}
-              </a>
+              item.isRoute ? (
+                <button
+                  key={item.href}
+                  onClick={() => handleNavClick(item.href, true)}
+                  className="block w-full text-left font-body text-lg text-cream/80 hover:text-cream py-2 border-b border-cream/10 transition-colors"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => handleNavClick(item.href)}
+                  className="block font-body text-lg text-cream/80 hover:text-cream py-2 border-b border-cream/10 transition-colors"
+                >
+                  {item.label}
+                </a>
+              )
             ))}
           </nav>
 
