@@ -1,191 +1,166 @@
-#🌱 GreenBridge
+# 🌱 GreenBridge
 
-GreenBridge is a role-based sustainability platform that connects companies, government bodies, and citizens to enable transparent, verified ecological restoration and responsible land utilization.
+GreenBridge is a role-based sustainability and ecological governance platform that connects business partners and government authorities to enable transparent land utilization, ecological restoration, and verified environmental impact.
 
-It acts as a digital bridge between land, industry, and governance—turning sustainability goals into measurable, auditable impact.
+---
 
-🚨 Problem Statement
+## ❓ Problem Statement
 
-Large areas of land remain degraded or underutilized
+Large areas of land are degraded or underutilized.
 
-Companies want to meet ESG & sustainability goals, but face:
+Companies want to invest in sustainability but face:
 
-Fragmented data
-
-Lack of verification
-
-Greenwashing risks
+- Lack of transparency  
+- Unverified impact claims  
+- Complex approval processes  
 
 Government bodies struggle with:
 
-Manual approval workflows
+- Manual workflows  
+- Poor monitoring  
+- Limited analytics and reporting  
 
-Poor visibility into land usage
+❗ No unified system exists to connect industry + governance + land data.
 
-Limited post-approval monitoring
+---
 
-Citizens lack trust and access to verified green initiatives
+## 💡 What is GreenBridge?
 
-💡 Solution: GreenBridge
+GreenBridge is a **digital bridge between land, industry, and government** that transforms sustainability initiatives into structured, trackable, and auditable workflows.
 
-GreenBridge provides a centralized, role-based platform that enables:
+It ensures:
 
-Structured ecological project requests by companies
+- ✅ Verified ecological projects  
+- ✅ Clear role separation  
+- ✅ End-to-end transparency  
 
-Transparent approvals and compliance tracking by government bodies
+---
 
-Data-driven monitoring of environmental impact
+## 🧱 Platform Structure
 
-A future-ready marketplace for citizen participation
+GreenBridge consists of **two active dashboards** and **one planned module**.
 
-🧩 Platform Architecture
+---
 
-GreenBridge is built around three core dashboards:
+### 🏢 Partner (Business) Dashboard
 
-1️⃣ Partner (Company) Dashboard
+Designed for companies and organizations.
 
-For businesses and organizations
+#### Features:
 
-Features:
+- Sustainability project marketplace  
+- Submit land or ecological restoration requests  
+- Matching engine for projects and resources  
+- ROI and impact calculators  
+- Order and invoice management  
+- Impact analytics dashboard  
+- Account and organization settings  
 
-Submit ecological / land restoration requests
+---
 
-Access a B2B2C sustainability marketplace
+### 🏛️ Government Dashboard
 
-Matching engine for projects & resources
+Designed for government bodies and authorities.
 
-ROI & impact calculators
+#### Features:
 
-Order and compliance management
+- Centralized overview of all projects  
+- Inventory and land management  
+- Company request review and approvals  
+- Financial and impact analytics  
+- Compliance and audit workflows  
+- Report generation and export  
 
-Impact analytics dashboard
+---
 
-2️⃣ Government Dashboard
+### 🛒 Consumer Marketplace *(Future Scope)*
 
-For municipalities and regulatory authorities
+Planned module for citizens and communities.
 
-Features:
+#### Planned Features:
 
-Centralized overview of all projects
+- Browse verified ecological initiatives  
+- Support projects without login  
+- Direct contribution using address and payment  
+- Full transparency backed by government verification  
 
-Inventory & land management
+---
 
-Company request approvals
+## 🔐 Role-Based Access Control
 
-Financial analytics
+GreenBridge uses authentication with strict role separation:
 
-Compliance audits & reporting
+- Business users cannot access government dashboards  
+- Government users cannot access business tools  
+- Each dashboard renders only role-specific components  
 
-Exportable reports for governance
+This ensures **security, trust, and governance integrity**.
 
-3️⃣ Consumer Marketplace (Planned)
+---
 
-For individuals and communities
+## 🛠️ Tech Stack
 
-Future Scope:
+| Category | Technology |
+|----------|-------------|
+| Frontend | React + TypeScript |
+| Styling | Tailwind CSS |
+| Icons | Lucide React |
+| Backend & Auth | Supabase |
+| Routing | React Router |
+| State Management | React Hooks |
 
-Support verified ecological projects
+---
 
-Transparent contribution tracking
+## 🌍 Impact
 
-No greenwashing—government-verified only
+### 🌿 Environmental Impact
 
-Open participation in sustainability efforts
+- Faster ecological restoration  
+- Reduced greenwashing  
+- Verified sustainability outcomes  
 
-🔐 Role-Based Access Control
+---
 
-GreenBridge uses authentication + role separation to ensure:
+### 💰 Economic Impact
 
-Companies cannot access government tools
+- Simplified ESG compliance  
+- Efficient approval pipelines  
+- Better ROI visibility for green investments  
 
-Government users cannot access business operations
+---
 
-Each role sees only what they are authorized to see
+### 🏛️ Governance Impact
 
-This ensures security, accountability, and trust.
+- Transparent decision-making  
+- Centralized monitoring  
+- Audit-ready data and reports  
 
-🛠️ Tech Stack
+---
 
-Frontend: React + TypeScript
+## 🚀 Why GreenBridge?
 
-UI: Tailwind CSS
+Not just a dashboard  
+Not just an ESG tracker  
+Not just a marketplace  
 
-Icons: Lucide React
+👉 GreenBridge is an **ecological operating system** connecting policy, industry, and land through technology.
 
-Auth & Backend: Supabase
+---
 
-Routing: React Router
+## 🔮 Future Enhancements
 
-State: React Hooks
+- AI-generated impact reports  
+- GIS-based land visualization  
+- Carbon credit integration  
+- Citizen participation module  
+- Multi-region and multilingual support  
 
-🌍 Impact
-Environmental
+---
 
-Faster land restoration
+## ▶️ Getting Started
 
-Verified ecological outcomes
+### Clone Repository
 
-Reduced greenwashing
-
-Economic
-
-ESG compliance made simpler
-
-Efficient approval pipelines
-
-Sustainable project enablement
-
-Governance
-
-Transparent workflows
-
-Centralized oversight
-
-Audit-ready reporting
-
-Social
-
-Increased trust in sustainability initiatives
-
-Citizen participation (future scope)
-
-🚀 Why GreenBridge is Different
-
-Not just a dashboard
-
-Not just an ESG tracker
-
-Not just a marketplace
-
-GreenBridge is an ecological operating system—connecting stakeholders through data, governance, and verified impact.
-
-📈 Future Enhancements
-
-Consumer-facing marketplace
-
-AI-based impact prediction
-
-GIS-based land visualization
-
-Carbon credit integration
-
-Multi-language & regional support
-
-🏁 Getting Started
+```bash
 git clone https://github.com/your-username/greenbridge.git
 cd greenbridge
-npm install
-npm run dev
-
-
-Set up Supabase keys in your environment variables before running.
-
-🏆 Ideal Use Cases
-
-ESG-focused companies
-
-Government land management bodies
-
-Smart city initiatives
-
-Climate & sustainability programs
