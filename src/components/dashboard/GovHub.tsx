@@ -1,26 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FileText, Upload, CheckCircle, Clock, AlertTriangle, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCollaborations } from "@/hooks/useDashboardData";
 
-const collaborations = [
-  {
-    title: "MOU between MCD & GreenFurniture Ltd",
-    status: "approved",
-    date: "Signed: Jan 15, 2026",
-    detail: "500 MT Reclaimed Wood supply agreement",
-  },
-  {
-    title: "Quality Certification - MetalCorp Industries",
-    status: "pending",
-    date: "Submitted: Jan 20, 2026",
-    detail: "Grade A Metal certification pending review",
-  },
-  {
-    title: "Waste Supply Agreement - TextileWorks",
-    status: "revision",
-    date: "Updated: Jan 18, 2026",
-    detail: "Quantity terms need revision",
-  },
+const MOCK_COLLABORATIONS = [
+  { title: "MOU between MCD & GreenFurniture Ltd", status: "approved", date: "Signed: Jan 15, 2026", detail: "500 MT Reclaimed Wood supply agreement" },
+  { title: "Quality Certification - MetalCorp Industries", status: "pending", date: "Submitted: Jan 20, 2026", detail: "Grade A Metal certification pending review" },
+  { title: "Waste Supply Agreement - TextileWorks", status: "revision", date: "Updated: Jan 18, 2026", detail: "Quantity terms need revision" },
 ];
 
 const statusConfig = {
@@ -32,6 +18,16 @@ const statusConfig = {
 export function GovHub() {
   const { toast } = useToast();
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const { data: liveCollaborations = [] } = useCollaborations(true);
+  const collaborations = useMemo(() => {
+    const fromDb = liveCollaborations.map((c) => ({
+      title: c.title ?? `Request ${c.request_id.slice(0, 8)}`,
+      status: c.status as "approved" | "pending" | "revision",
+      date: c.updated_at.slice(0, 10),
+      detail: c.detail ?? "Collaboration with government",
+    }));
+    return fromDb.length > 0 ? fromDb : MOCK_COLLABORATIONS;
+  }, [liveCollaborations]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

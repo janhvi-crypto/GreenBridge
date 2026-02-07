@@ -1,4 +1,11 @@
 import { useState } from "react";
+import { useEffect } from "react";
+
+
+
+import { supabase } from "@/lib/supabase";
+import { ensureGovernmentProfile } from "@/lib/dashboard-api";
+
 import { 
   LayoutDashboard, 
   Package, 
@@ -36,10 +43,37 @@ export default function GovernmentDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data } = await supabase.auth.getUser();
 
-  const handleLogout = () => {
-    navigate("/");
+      if (!data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const role = (data.user.user_metadata?.role ?? data.user.app_metadata?.role) as string | undefined;
+      if (role !== "government") {
+        navigate("/login");
+        return;
+      }
+      // Ensure profile has role so RLS policies (user_role() = 'government') allow approve/orders
+      try {
+        await ensureGovernmentProfile();
+      } catch {
+        // Profiles table may be missing or RLS may block; rely on user_metadata.role
+      }
+    };
+
+    checkAccess();
+  }, [navigate]);
+  
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
   };
+  
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);

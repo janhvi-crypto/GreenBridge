@@ -1,48 +1,60 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Check, X, Eye, Building2, Calendar, Package, FileText } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useCollaborations, useUpdateCollaborationStatus } from "@/hooks/useDashboardData";
+import type { CollaborationStatus } from "@/types/dashboard";
 
-const pendingRequests = [
-  {
-    id: 1,
-    company: "EcoTech Industries",
-    type: "Textile Recycling",
-    wasteCategory: "Textile Waste",
-    quantity: 500,
-    submittedDate: "2024-01-15",
-    description: "Request to collect and recycle textile waste from Sector A-12 for fabric regeneration.",
-    documents: ["Business License", "Environmental Permit", "Processing Capability Report"],
-  },
-  {
-    id: 2,
-    company: "GreenCycle Corp",
-    type: "Plastic Processing",
-    wasteCategory: "Plastic Waste",
-    quantity: 800,
-    submittedDate: "2024-01-14",
-    description: "Proposal for plastic waste collection and conversion into recycled pellets.",
-    documents: ["Business License", "Environmental Permit"],
-  },
-  {
-    id: 3,
-    company: "MetalWorks Ltd",
-    type: "Metal Recycling",
-    wasteCategory: "Metal Scrap",
-    quantity: 1200,
-    submittedDate: "2024-01-13",
-    description: "Request for metal scrap collection for industrial recycling purposes.",
-    documents: ["Business License", "Safety Certificate", "Equipment Certification"],
-  },
+const MOCK_PENDING = [
+  { id: "1", company: "EcoTech Industries", type: "Textile Recycling", wasteCategory: "Textile Waste", quantity: 500, submittedDate: "2024-01-15", description: "Request to collect and recycle textile waste.", documents: ["Business License", "Environmental Permit"] },
 ];
-
-const approvalHistory = [
-  { id: 101, company: "ReNew Materials", status: "approved", date: "2024-01-10", wasteCategory: "Electronic Waste" },
-  { id: 102, company: "BioCycle Solutions", status: "rejected", date: "2024-01-08", wasteCategory: "Organic Waste" },
-  { id: 103, company: "ConstructRecycle Inc", status: "approved", date: "2024-01-05", wasteCategory: "Construction Debris" },
-  { id: 104, company: "EcoFiber Ltd", status: "revision", date: "2024-01-03", wasteCategory: "Textile Waste" },
+const MOCK_HISTORY: { id: string; company: string; status: CollaborationStatus; date: string; wasteCategory: string }[] = [
+  { id: "101", company: "ReNew Materials", status: "approved", date: "2024-01-10", wasteCategory: "Electronic Waste" },
+  { id: "102", company: "EcoFiber Ltd", status: "revision", date: "2024-01-03", wasteCategory: "Textile Waste" },
 ];
 
 export function CollaborationApprovals() {
-  const [selectedRequest, setSelectedRequest] = useState<typeof pendingRequests[0] | null>(null);
+  const { toast } = useToast();
+  const [selectedRequest, setSelectedRequest] = useState<typeof MOCK_PENDING[0] | null>(null);
+  const { data: collaborations = [] } = useCollaborations(false);
+  const updateStatus = useUpdateCollaborationStatus();
+
+  const pendingList = useMemo(() => {
+    const fromDb = collaborations.filter((c) => c.status === "pending").map((c) => ({
+      id: c.id,
+      company: c.title ?? "Collaboration",
+      type: c.detail ?? "—",
+      wasteCategory: "—",
+      quantity: 0,
+      submittedDate: c.created_at?.slice(0, 10) ?? "—",
+      description: c.detail ?? "",
+      documents: [] as string[],
+    }));
+    return fromDb.length > 0 ? fromDb : MOCK_PENDING;
+  }, [collaborations]);
+
+  const historyList = useMemo(() => {
+    const fromDb = collaborations.filter((c) => c.status !== "pending").map((c) => ({
+      id: c.id,
+      company: c.title ?? "—",
+      status: c.status as CollaborationStatus,
+      date: c.updated_at?.slice(0, 10) ?? "—",
+      wasteCategory: "—",
+    }));
+    return fromDb.length > 0 ? fromDb : MOCK_HISTORY;
+  }, [collaborations]);
+
+  const pendingCount = collaborations.filter((c) => c.status === "pending").length;
+  const approvedCount = collaborations.filter((c) => c.status === "approved").length;
+  const revisionCount = collaborations.filter((c) => c.status === "revision").length;
+
+  const handleStatus = async (id: string, status: CollaborationStatus) => {
+    try {
+      await updateStatus.mutateAsync({ id, status });
+      toast({ title: status === "approved" ? "Approved" : status === "revision" ? "Sent for revision" : "Rejected", description: `Collaboration ${id}` });
+    } catch (e) {
+      toast({ title: "Update failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -55,20 +67,20 @@ export function CollaborationApprovals() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="glass-card p-4 text-center">
-          <p className="font-display text-2xl text-warning">3</p>
+          <p className="font-display text-2xl text-warning">{pendingCount || pendingList.length}</p>
           <p className="font-body text-xs text-cream/60">Pending</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <p className="font-display text-2xl text-success">28</p>
+          <p className="font-display text-2xl text-success">{approvedCount}</p>
           <p className="font-body text-xs text-cream/60">Approved</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <p className="font-display text-2xl text-destructive">5</p>
-          <p className="font-body text-xs text-cream/60">Rejected</p>
+          <p className="font-display text-2xl text-destructive">{revisionCount}</p>
+          <p className="font-body text-xs text-cream/60">Revision</p>
         </div>
         <div className="glass-card p-4 text-center">
-          <p className="font-display text-2xl text-cream">4</p>
-          <p className="font-body text-xs text-cream/60">Under Review</p>
+          <p className="font-display text-2xl text-cream">{collaborations.length}</p>
+          <p className="font-body text-xs text-cream/60">Total</p>
         </div>
       </div>
 
@@ -76,7 +88,7 @@ export function CollaborationApprovals() {
       <div className="glass-card p-6">
         <h3 className="font-display text-xl text-cream mb-6">Pending Requests</h3>
         <div className="space-y-4">
-          {pendingRequests.map((request) => (
+          {pendingList.map((request) => (
             <div key={request.id} className="p-4 rounded-lg bg-cream/5 hover:bg-cream/10 transition-colors">
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex items-center gap-4 flex-1">
@@ -109,18 +121,34 @@ export function CollaborationApprovals() {
                   >
                     <Eye className="w-5 h-5 text-cream" />
                   </button>
-                  <button 
-                    className="p-2 rounded-lg bg-success/20 hover:bg-success/30 transition-colors"
-                    title="Approve"
-                  >
-                    <Check className="w-5 h-5 text-success" />
-                  </button>
-                  <button 
-                    className="p-2 rounded-lg bg-destructive/20 hover:bg-destructive/30 transition-colors"
-                    title="Reject"
-                  >
-                    <X className="w-5 h-5 text-destructive" />
-                  </button>
+                  {collaborations.some((c) => c.id === request.id) && (
+                    <>
+                      <button 
+                        onClick={() => handleStatus(request.id, "approved")}
+                        disabled={updateStatus.isPending}
+                        className="p-2 rounded-lg bg-success/20 hover:bg-success/30 transition-colors disabled:opacity-50"
+                        title="Approve"
+                      >
+                        <Check className="w-5 h-5 text-success" />
+                      </button>
+                      <button 
+                        onClick={() => handleStatus(request.id, "revision")}
+                        disabled={updateStatus.isPending}
+                        className="p-2 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 transition-colors disabled:opacity-50"
+                        title="Request revision"
+                      >
+                        <FileText className="w-5 h-5 text-yellow-400" />
+                      </button>
+                      <button 
+                        onClick={() => handleStatus(request.id, "revision")}
+                        disabled={updateStatus.isPending}
+                        className="p-2 rounded-lg bg-destructive/20 hover:bg-destructive/30 transition-colors disabled:opacity-50"
+                        title="Reject (send back)"
+                      >
+                        <X className="w-5 h-5 text-destructive" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -132,7 +160,7 @@ export function CollaborationApprovals() {
       <div className="glass-card p-6">
         <h3 className="font-display text-xl text-cream mb-6">Recent History</h3>
         <div className="space-y-3">
-          {approvalHistory.map((item) => (
+          {historyList.map((item) => (
             <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-cream/5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-cream/10 flex items-center justify-center">
@@ -148,7 +176,6 @@ export function CollaborationApprovals() {
                 <span className={`
                   px-3 py-1 rounded-full text-xs font-body capitalize
                   ${item.status === "approved" ? "badge-approved" : ""}
-                  ${item.status === "rejected" ? "badge-revision" : ""}
                   ${item.status === "revision" ? "badge-pending" : ""}
                 `}>
                   {item.status}

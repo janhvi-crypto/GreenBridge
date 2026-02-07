@@ -1,7 +1,14 @@
 import { useState } from "react";
-import { FileText, Download, Calendar, BarChart3, Loader2 } from "lucide-react";
+import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
+import * as api from "@/lib/api";
 
 const reportTypes = [
+  {
+    id: "waste-segregation",
+    name: "Waste Segregation Report",
+    description: "AI-generated PDF report for citizens (Gemini). Download ready.",
+    sections: ["Why Segregate", "Wet / Dry / E-waste / Hazardous", "Impact", "Next Steps"],
+  },
   {
     id: "monthly",
     name: "Monthly Report",
@@ -41,12 +48,34 @@ export function ReportsExport() {
   const [format, setFormat] = useState<"pdf" | "excel">("pdf");
   const [generating, setGenerating] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    if (!selectedReport) return;
     setGenerating(true);
-    setTimeout(() => {
+    try {
+      if (selectedReport === "waste-segregation") {
+        const blob = await api.generateWasteReportPdf({
+          dateFrom: dateRange.start,
+          dateTo: dateRange.end,
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "waste-segregation-report.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        await new Promise((r) => setTimeout(r, 1500));
+        if (typeof window !== "undefined" && window.alert) {
+          window.alert("Report generated (mock). In production this would download PDF/Excel.");
+        }
+      }
+    } catch (e) {
+      if (typeof window !== "undefined" && window.alert) {
+        window.alert(e instanceof Error ? e.message : "Report failed.");
+      }
+    } finally {
       setGenerating(false);
-      // Would trigger download
-    }, 2000);
+    }
   };
 
   return (

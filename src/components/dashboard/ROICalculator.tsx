@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calculator, Leaf, IndianRupee, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import * as api from "@/lib/api";
 
 const wasteTypes = [
   { type: "Reclaimed Wood", co2Factor: 1.2, revenuePerMT: 2500 },
@@ -33,21 +34,34 @@ export function ROICalculator() {
     return `₹${value.toLocaleString()}`;
   };
 
-  const handleIssueNFT = () => {
-    if (!walletAddress) {
+  const handleIssueNFT = async () => {
+    if (!walletAddress.trim()) {
       toast({
         title: "Wallet address required",
-        description: "Please enter your wallet address to issue the NFT.",
+        description: "Please enter your 0x wallet address to issue the certificate.",
         variant: "destructive",
       });
       return;
     }
-    setShowNFTModal(false);
-    toast({
-      title: "Carbon Credit NFT Issued",
-      description: `NFT for ${co2Saved.toFixed(2)} MT CO₂ sent to ${walletAddress.slice(0, 8)}...`,
-    });
-    setWalletAddress("");
+    try {
+      const res = await api.createCertificate({
+        walletAddress: walletAddress.trim(),
+        co2Saved,
+        wasteType: selectedType.type,
+      });
+      setShowNFTModal(false);
+      setWalletAddress("");
+      toast({
+        title: "Carbon Credit Certificate Issued",
+        description: `${res.certificateId} · Demo certificate (not on-chain). Tx ref: ${res.txHash.slice(0, 14)}...`,
+      });
+    } catch (e) {
+      toast({
+        title: "Certificate failed",
+        description: e instanceof Error ? e.message : "Try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -152,7 +166,7 @@ export function ROICalculator() {
               Carbon Credit Certification
             </h3>
             <p className="font-body text-sm text-cream/60">
-              Issue a blockchain-verified carbon credit NFT for your environmental impact.
+              Issue a carbon credit certificate (demo – not minted on-chain). Wallet verified via Alchemy/Ethereum.
             </p>
           </div>
           <button

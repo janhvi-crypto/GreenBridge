@@ -1,6 +1,10 @@
-import { useState } from "react";
-import { Search, Upload, Check, Clock, AlertCircle } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Search, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useInventory } from "@/hooks/useDashboardData";
+import { useInsertBusinessRequest } from "@/hooks/useDashboardData";
+import * as api from "@/lib/api";
+import type { InventoryItem } from "@/types/dashboard";
 
 const wasteTypes = [
   "Reclaimed Wood",
@@ -11,40 +15,30 @@ const wasteTypes = [
   "Electronic Waste",
 ];
 
-const mockMatches = [
-  {
-    id: 1,
-    type: "Reclaimed Wood",
-    available: "650 MT",
-    quality: "Grade A",
-    location: "Delhi NCR",
-    price: "₹2,500/MT",
-    matchScore: 95,
-  },
-  {
-    id: 2,
-    type: "Reclaimed Wood",
-    available: "320 MT",
-    quality: "Grade B",
-    location: "Ghaziabad",
-    price: "₹1,800/MT",
-    matchScore: 82,
-  },
-  {
-    id: 3,
-    type: "Reclaimed Wood",
-    available: "180 MT",
-    quality: "Grade A",
-    location: "Noida",
-    price: "₹2,200/MT",
-    matchScore: 78,
-  },
+const MOCK_MATCHES = [
+  { id: "1", type: "Reclaimed Wood", available: "650 MT", quality: "Grade A", location: "Delhi NCR", price: "₹2,500/MT", matchScore: 95 },
+  { id: "2", type: "Reclaimed Wood", available: "320 MT", quality: "Grade B", location: "Ghaziabad", price: "₹1,800/MT", matchScore: 82 },
+  { id: "3", type: "Reclaimed Wood", available: "180 MT", quality: "Grade A", location: "Noida", price: "₹2,200/MT", matchScore: 78 },
 ];
+
+function inventoryToMatch(i: InventoryItem, score: number) {
+  const price = i.price_min != null ? `₹${i.price_min}/MT` : "Contact";
+  return {
+    id: i.id,
+    type: i.category,
+    available: `${i.quantity} ${i.unit}`,
+    quality: `Grade ${i.grade}`,
+    location: i.location ?? "—",
+    price,
+    matchScore: score,
+  };
+}
 
 export function MatchingEngine() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [minQuantity, setMinQuantity] = useState("");
+  const [maxBudget, setMaxBudget] = useState("");
   const [showMatches, setShowMatches] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<null | {
@@ -53,6 +47,18 @@ export function MatchingEngine() {
     quantity: string;
     suggestion: string;
   }>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: liveInventory = [] } = useInventory(true);
+  const insertRequest = useInsertBusinessRequest();
+
+  const matches = useMemo(() => {
+    const filtered = selectedType
+      ? liveInventory.filter((i) => i.category === selectedType)
+      : liveInventory;
+    const fromDb = filtered.slice(0, 10).map((i, idx) => inventoryToMatch(i, 95 - idx * 5));
+    return fromDb.length > 0 ? fromDb : MOCK_MATCHES;
+  }, [liveInventory, selectedType]);
 
   const handleSearch = () => {
     if (!selectedType) {
@@ -66,24 +72,55 @@ export function MatchingEngine() {
     setShowMatches(true);
   };
 
-  const handlePhotoAnalysis = () => {
+  const handlePhotoAnalysis = async () => {
+    const file = photoInputRef.current?.files?.[0];
+    if (!file) {
+      toast({ title: "Choose a photo", description: "Select an image first, then click AI Analyze Photo.", variant: "destructive" });
+      return;
+    }
     setAnalyzing(true);
-    setTimeout(() => {
-      setAnalyzing(false);
+    try {
+      const data = await api.analyzeWaste(file);
       setAnalysisResult({
-        type: "Reclaimed Wood",
-        quality: "Grade A (87% purity)",
-        quantity: "Estimated 45-50 MT",
-        suggestion: "Suitable for furniture manufacturing, particle board production",
+        type: data.category,
+        quality: `Grade ${data.grade} (${data.confidence}% confidence)`,
+        quantity: `Estimated ${data.quantity} MT`,
+        suggestion: data.quality,
       });
-    }, 2000);
+      setSelectedType(data.category);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      const isRateLimit = msg.includes("rate limit") || msg.includes("quota") || msg.includes("429");
+      toast({
+        title: isRateLimit ? "Rate limit" : "Analysis failed",
+        description: isRateLimit ? "API quota reached. Please try again in a minute." : (msg || "Try again."),
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
-  const handleRequestQuote = (matchId: number) => {
-    toast({
-      title: "Quote Requested",
-      description: "The supplier will respond within 24-48 hours.",
-    });
+  const handleRequestQuote = async (match: { id: string; type: string; available: string; price: string }) => {
+    const qty = parseInt(minQuantity, 10) || 50;
+    const budget = maxBudget ? `₹${maxBudget}/MT` : undefined;
+    try {
+      await insertRequest.mutateAsync({
+        material_type: match.type,
+        quantity: qty,
+        budget: budget ?? match.price,
+      });
+      toast({
+        title: "Quota request submitted",
+        description: "Government will review and approve. Check Company Requests on the government dashboard.",
+      });
+    } catch (e) {
+      toast({
+        title: "Request failed",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -113,6 +150,8 @@ export function MatchingEngine() {
               type="number"
               className="input-elegant-filled"
               placeholder="e.g., 100"
+              value={minQuantity}
+              onChange={(e) => setMinQuantity(e.target.value)}
             />
           </div>
           <div>
@@ -121,6 +160,8 @@ export function MatchingEngine() {
               type="number"
               className="input-elegant-filled"
               placeholder="e.g., 3000"
+              value={maxBudget}
+              onChange={(e) => setMaxBudget(e.target.value)}
             />
           </div>
         </div>
@@ -143,7 +184,14 @@ export function MatchingEngine() {
           <p className="font-body text-cream/60 mb-4">
             Drag and drop an image, or click to browse
           </p>
-          <input type="file" className="hidden" id="photo-upload" accept="image/*" />
+          <input
+            ref={photoInputRef}
+            type="file"
+            className="hidden"
+            id="photo-upload"
+            accept="image/*"
+            onChange={() => setAnalysisResult(null)}
+          />
           <label htmlFor="photo-upload" className="btn-outline-elegant cursor-pointer">
             Choose File
           </label>
@@ -195,7 +243,7 @@ export function MatchingEngine() {
             Available Matches for {selectedType || "All Types"}
           </h3>
           <div className="space-y-4">
-            {mockMatches.map((match) => (
+            {matches.map((match) => (
               <div
                 key={match.id}
                 className="p-4 bg-cream/5 rounded-lg border border-cream/10 flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -228,10 +276,11 @@ export function MatchingEngine() {
                     <p className="font-body text-xs text-cream/60">Match</p>
                   </div>
                   <button
-                    onClick={() => handleRequestQuote(match.id)}
-                    className="btn-elegant text-sm py-2"
+                    onClick={() => handleRequestQuote(match)}
+                    disabled={insertRequest.isPending}
+                    className="btn-elegant text-sm py-2 disabled:opacity-50"
                   >
-                    Request Quote
+                    {insertRequest.isPending ? "Submitting..." : "Request Quota"}
                   </button>
                 </div>
               </div>

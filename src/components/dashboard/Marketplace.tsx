@@ -1,84 +1,66 @@
-import { useState } from "react";
-import { Search, Filter, QrCode, Truck, ShieldCheck } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, QrCode, Truck, ShieldCheck, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useInventory, useInsertBusinessRequest } from "@/hooks/useDashboardData";
+import type { InventoryItem } from "@/types/dashboard";
 
-const wasteInventory = [
-  {
-    id: 1,
-    type: "Reclaimed Wood",
-    quantity: 650,
-    priceRange: "₹1,800 - 2,200",
-    grade: "A",
-    location: "Bandhwari Landfill",
-    deliveryTime: "15 days",
-    qrCode: "WD-2847-A",
-    available: true,
-  },
-  {
-    id: 2,
-    type: "Metal / Steel",
-    quantity: 520,
-    priceRange: "₹2,000 - 2,400",
-    grade: "A",
-    location: "Okhla Depot",
-    deliveryTime: "10 days",
-    qrCode: "MT-1923-A",
-    available: true,
-  },
-  {
-    id: 3,
-    type: "Plastic / PET",
-    quantity: 380,
-    priceRange: "₹1,500 - 2,000",
-    grade: "B",
-    location: "Ghazipur",
-    deliveryTime: "12 days",
-    qrCode: "PL-3847-B",
-    available: true,
-  },
-  {
-    id: 4,
-    type: "Construction Debris",
-    quantity: 450,
-    priceRange: "₹800 - 1,200",
-    grade: "B",
-    location: "Bandhwari Landfill",
-    deliveryTime: "20 days",
-    qrCode: "CD-9283-B",
-    available: true,
-  },
-  {
-    id: 5,
-    type: "Textile / Fabric",
-    quantity: 470,
-    priceRange: "₹1,200 - 1,800",
-    grade: "A",
-    location: "Okhla Depot",
-    deliveryTime: "14 days",
-    qrCode: "TX-7462-A",
-    available: true,
-  },
-  {
-    id: 6,
-    type: "Electronic Waste",
-    quantity: 177,
-    priceRange: "₹3,000 - 5,000",
-    grade: "C",
-    location: "Special Facility",
-    deliveryTime: "25 days",
-    qrCode: "EW-5829-C",
-    available: false,
-  },
+const MOCK_WASTE = [
+  { id: 1, type: "Reclaimed Wood", quantity: 650, priceRange: "₹1,800 - 2,200", grade: "A" as const, location: "Bandhwari Landfill", deliveryTime: "15 days", qrCode: "WD-2847-A", available: true },
+  { id: 2, type: "Metal / Steel", quantity: 520, priceRange: "₹2,000 - 2,400", grade: "A" as const, location: "Okhla Depot", deliveryTime: "10 days", qrCode: "MT-1923-A", available: true },
+  { id: 3, type: "Plastic / PET", quantity: 380, priceRange: "₹1,500 - 2,000", grade: "B" as const, location: "Ghazipur", deliveryTime: "12 days", qrCode: "PL-3847-B", available: true },
+  { id: 4, type: "Construction Debris", quantity: 450, priceRange: "₹800 - 1,200", grade: "B" as const, location: "Bandhwari Landfill", deliveryTime: "20 days", qrCode: "CD-9283-B", available: true },
+  { id: 5, type: "Textile / Fabric", quantity: 470, priceRange: "₹1,200 - 1,800", grade: "A" as const, location: "Okhla Depot", deliveryTime: "14 days", qrCode: "TX-7462-A", available: true },
+  { id: 6, type: "Electronic Waste", quantity: 177, priceRange: "₹3,000 - 5,000", grade: "C" as const, location: "Special Facility", deliveryTime: "25 days", qrCode: "EW-5829-C", available: false },
 ];
 
 const categories = ["All", "Wood", "Metal", "Plastic", "Construction", "Textile", "Electronics"];
 const grades = ["All", "A", "B", "C"];
 
+type MarketplaceItemDisplay = {
+  id: string;
+  type: string;
+  quantity: number;
+  priceRange: string;
+  grade: string;
+  location: string;
+  deliveryTime: string;
+  qrCode: string;
+  available: boolean;
+};
+
+function toMarketplaceItem(i: InventoryItem): MarketplaceItemDisplay {
+  const priceRange = i.price_min != null || i.price_max != null
+    ? `₹${i.price_min ?? "?"} - ${i.price_max ?? "?"}`
+    : "Contact";
+  return {
+    id: i.id,
+    type: i.category,
+    quantity: Number(i.quantity),
+    priceRange,
+    grade: i.grade,
+    location: i.location ?? "—",
+    deliveryTime: "10–15 days",
+    qrCode: i.qr_code ?? "—",
+    available: i.status === "available",
+  };
+}
+
 export function Marketplace() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedGrade, setSelectedGrade] = useState("All");
-  const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [quantityRange, setQuantityRange] = useState([0, 1000]);
+  const [quotaModal, setQuotaModal] = useState<{
+    item: MarketplaceItemDisplay;
+    quantity: string;
+    budget: string;
+  } | null>(null);
+  const { data: liveInventory = [] } = useInventory(true);
+  const insertRequest = useInsertBusinessRequest();
+  const wasteInventory = useMemo(() => {
+    const fromDb = liveInventory.map(toMarketplaceItem);
+    return fromDb.length > 0 ? fromDb : MOCK_WASTE.map((m) => ({ ...m, id: String(m.id) }));
+  }, [liveInventory]);
 
   const filteredInventory = wasteInventory.filter((item) => {
     const matchesSearch = item.type.toLowerCase().includes(searchQuery.toLowerCase());
@@ -86,6 +68,41 @@ export function Marketplace() {
     const matchesGrade = selectedGrade === "All" || item.grade === selectedGrade;
     return matchesSearch && matchesCategory && matchesGrade;
   });
+
+  const handleRequestQuota = (item: MarketplaceItemDisplay) => {
+    setQuotaModal({
+      item,
+      quantity: String(Math.min(50, item.quantity) || 50),
+      budget: "",
+    });
+  };
+
+  const handleSubmitQuota = async () => {
+    if (!quotaModal) return;
+    const qty = parseInt(quotaModal.quantity, 10) || 50;
+    if (qty <= 0) {
+      toast({ title: "Invalid quantity", description: "Enter a positive quantity (MT).", variant: "destructive" });
+      return;
+    }
+    try {
+      await insertRequest.mutateAsync({
+        material_type: quotaModal.item.type,
+        quantity: qty,
+        budget: quotaModal.budget ? `₹${quotaModal.budget}/MT` : quotaModal.item.priceRange,
+      });
+      toast({
+        title: "Quota request submitted",
+        description: "Government will review and approve. Check Company Requests on the government dashboard.",
+      });
+      setQuotaModal(null);
+    } catch (e) {
+      toast({
+        title: "Request failed",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -203,9 +220,10 @@ export function Marketplace() {
             <div className="flex gap-3">
               <button
                 disabled={!item.available}
-                className="btn-elegant flex-1 text-center text-sm"
+                onClick={() => item.available && handleRequestQuota(item)}
+                className="btn-elegant flex-1 text-center text-sm disabled:opacity-50"
               >
-                {item.available ? "Request Quote" : "Sold Out"}
+                {item.available ? "Request Quota" : "Sold Out"}
               </button>
               <button className="btn-outline-elegant px-4">
                 <QrCode className="w-4 h-4" />
@@ -214,6 +232,52 @@ export function Marketplace() {
           </div>
         ))}
       </div>
+
+      {/* Request Quota modal */}
+      {quotaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fade-in" onClick={() => setQuotaModal(null)}>
+          <div className="glass-card p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display text-xl text-cream mb-1">Request Quota</h3>
+            <p className="font-body text-sm text-cream/60 mb-4">{quotaModal.item.type} • Grade {quotaModal.item.grade}</p>
+            <div className="space-y-4">
+              <div>
+                <label className="info-label block mb-2">Quantity (MT)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={quotaModal.item.quantity}
+                  className="input-elegant-filled w-full"
+                  value={quotaModal.quantity}
+                  onChange={(e) => setQuotaModal((m) => m ? { ...m, quantity: e.target.value } : null)}
+                />
+                <p className="font-body text-xs text-cream/50 mt-1">Available: {quotaModal.item.quantity} MT</p>
+              </div>
+              <div>
+                <label className="info-label block mb-2">Budget (₹/MT, optional)</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 2000"
+                  className="input-elegant-filled w-full"
+                  value={quotaModal.budget}
+                  onChange={(e) => setQuotaModal((m) => m ? { ...m, budget: e.target.value } : null)}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setQuotaModal(null)} className="btn-outline-elegant flex-1">
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitQuota}
+                disabled={insertRequest.isPending}
+                className="btn-elegant flex-1 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {insertRequest.isPending ? "Submitting..." : <><Send className="w-4 h-4" /> Submit Request</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
@@ -7,75 +5,67 @@ import { Building2, Landmark, ArrowRight, ArrowLeft } from "lucide-react";
 
 type UserRole = "business" | "government" | null;
 
-export default function Login() {
+export default function Signup() {
   const [role, setRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+    setIsLoading(true);
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { role: role ?? undefined },
+      },
+    });
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    alert(error.message);
-    setIsLoading(false);
-    return;
-  }
-
-  // (we’ll store role properly next)
-  // Get role from user metadata (refetch so we have latest from Supabase)
-  const { data: { user } } = await supabase.auth.getUser();
-  const rawRole = (user?.user_metadata?.role ?? user?.app_metadata?.role) as string | undefined;
-  const storedRole = rawRole ? String(rawRole).toLowerCase() : undefined;
-
-  if (!storedRole || (storedRole !== "business" && storedRole !== "government")) {
-    // No role yet (legacy or first login): set role from selected portal and allow login
-    try {
-      await supabase.auth.updateUser({ data: { ...user?.user_metadata, role: role ?? undefined } });
-    } catch {
-      /* ignore */
+    if (error) {
+      setMessage(error.message);
+      setIsLoading(false);
+      return;
     }
-  } else if (storedRole !== role) {
-    await supabase.auth.signOut();
-    const otherPortal =
-      storedRole === "business" ? "Business Company" : "Government Department";
-    alert(
-      `This account is registered as a ${otherPortal} account. Please use the ${otherPortal} login.`
-    );
+
+    if (data.user && !data.session && data.user.identities?.length === 0) {
+      setMessage("An account with this email already exists. Please log in instead.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (data.session && role) {
+      if (role === "business") {
+        navigate("/dashboard");
+      } else {
+        navigate("/government-dashboard");
+      }
+    } else {
+      setMessage(
+        "Check your email for the confirmation link. After confirming, use the login page and select your account type (Business or Government) to sign in."
+      );
+    }
+
     setIsLoading(false);
-    return;
-  }
-
-  if (role === "business") {
-    navigate("/dashboard");
-  } else if (role === "government") {
-    navigate("/government-dashboard");
-  }
-
-  setIsLoading(false);
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-forest-dark flex items-center justify-center p-6">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, hsl(45, 30%, 92%) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, hsl(45, 30%, 92%) 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
+          }}
+        />
       </div>
 
       <div className="relative w-full max-w-lg">
-        {/* Back to Home */}
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-cream/60 hover:text-cream transition-colors mb-8 font-body text-sm"
@@ -84,19 +74,17 @@ const handleLogin = async (e: React.FormEvent) => {
           Back to Home
         </button>
 
-        {/* Logo */}
         <div className="text-center mb-12">
           <h1 className="font-display text-4xl text-cream italic mb-2">GreenBridge</h1>
-          <p className="font-body text-sm text-cream/60">Partner Portal Access</p>
+          <p className="font-body text-sm text-cream/60">Become a Partner</p>
         </div>
 
-        {/* Role Selection */}
         {!role ? (
           <div className="space-y-6 animate-fade-up">
             <p className="font-body text-cream/80 text-center mb-8">
-              Select your account type to continue
+              Choose your account type. This cannot be changed later.
             </p>
-            
+
             <button
               onClick={() => setRole("business")}
               className="w-full glass-card p-6 flex items-center gap-6 hover:bg-white/10 transition-all duration-300 group"
@@ -107,7 +95,7 @@ const handleLogin = async (e: React.FormEvent) => {
               <div className="text-left flex-1">
                 <h3 className="font-display text-xl text-cream mb-1">Business Company</h3>
                 <p className="font-body text-sm text-cream/60">
-                  Access matching engine, ROI calculator, and analytics
+                  For companies: matching engine, ROI calculator, and analytics
                 </p>
               </div>
               <ArrowRight className="w-5 h-5 text-cream/40 group-hover:text-cream transition-colors" />
@@ -123,15 +111,14 @@ const handleLogin = async (e: React.FormEvent) => {
               <div className="text-left flex-1">
                 <h3 className="font-display text-xl text-cream mb-1">Government Department</h3>
                 <p className="font-body text-sm text-cream/60">
-                  Manage inventory, approvals, and compliance tracking
+                  For government: inventory, approvals, and compliance tracking
                 </p>
               </div>
               <ArrowRight className="w-5 h-5 text-cream/40 group-hover:text-cream transition-colors" />
             </button>
           </div>
         ) : (
-          <form onSubmit={handleLogin} className="animate-fade-up">
-            {/* Role Badge */}
+          <form onSubmit={handleSignup} className="animate-fade-up">
             <div className="flex items-center justify-center gap-3 mb-8">
               <button
                 type="button"
@@ -153,6 +140,11 @@ const handleLogin = async (e: React.FormEvent) => {
             </div>
 
             <div className="glass-card p-8 space-y-6">
+              {message && (
+                <p className="font-body text-sm text-amber-200 bg-amber-900/30 border border-amber-700/50 rounded-lg p-3">
+                  {message}
+                </p>
+              )}
               <div>
                 <label className="info-label block mb-2">Email Address</label>
                 <input
@@ -161,7 +153,7 @@ const handleLogin = async (e: React.FormEvent) => {
                   className="input-elegant-filled"
                   required
                   value={email}
-                  onChange={(e)=>setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -169,23 +161,13 @@ const handleLogin = async (e: React.FormEvent) => {
                 <label className="info-label block mb-2">Password</label>
                 <input
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="At least 6 characters"
                   className="input-elegant-filled"
                   required
+                  minLength={6}
                   value={password}
-                  onChange={(e)=> setPassword(e.target.value)}
-
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded bg-white/10 border-white/30" />
-                  <span className="font-body text-sm text-cream/70">Remember me</span>
-                </label>
-                <button type="button" className="font-body text-sm text-cream/70 hover:text-cream transition-colors">
-                  Forgot password?
-                </button>
               </div>
 
               <button
@@ -193,13 +175,17 @@ const handleLogin = async (e: React.FormEvent) => {
                 disabled={isLoading}
                 className="btn-elegant w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Creating account..." : "Create account"}
               </button>
 
               <p className="text-center font-body text-sm text-cream/60">
-                Don't have an account?{" "}
-                <button type="button" onClick={() => navigate("/signup")} className="text-cream hover:underline">
-                  Become a Partner
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-cream hover:underline"
+                >
+                  Sign in
                 </button>
               </p>
             </div>

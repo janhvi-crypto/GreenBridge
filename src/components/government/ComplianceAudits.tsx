@@ -247,9 +247,14 @@ export function ComplianceAudits() {
               <p className="font-body text-sm text-cream/80 mb-2">{record.description}</p>
               <div className="flex items-center justify-between">
                 <span className="font-body text-xs text-cream/40">{record.timestamp}</span>
-                <button className="flex items-center gap-1 text-cream/60 hover:text-cream text-xs">
-                  <ExternalLink className="w-3 h-3" /> View on Explorer
-                </button>
+                <a
+                  href={record.hash.length > 20 ? `https://etherscan.io/tx/${record.hash}` : `https://etherscan.io/search?q=${encodeURIComponent(record.hash)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-cream/60 hover:text-cream text-xs"
+                >
+                  <ExternalLink className="w-3 h-3" /> View on Etherscan
+                </a>
               </div>
             </div>
           ))}

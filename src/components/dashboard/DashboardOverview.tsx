@@ -1,14 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TrendingUp, Package, Users, Leaf } from "lucide-react";
+import { useActivityLog, useInventory, useBusinessRequests, useOrders } from "@/hooks/useDashboardData";
 
-const metrics = [
-  { label: "Total Waste Available", value: "2,847 MT", icon: Package, trend: "+12%" },
-  { label: "Active Matches", value: "24", icon: Users, trend: "+3" },
-  { label: "CO₂ Diverted", value: "3,416 MT", icon: Leaf, trend: "+156 MT" },
-  { label: "Revenue Generated", value: "₹4.2 Cr", icon: TrendingUp, trend: "+18%" },
-];
-
-const recentActivity = [
+const MOCK_ACTIVITY = [
   { action: "New match found", detail: "Metal/Steel - 120 MT available", time: "2 hours ago" },
   { action: "Quote approved", detail: "Reclaimed Wood - 50 MT", time: "5 hours ago" },
   { action: "Document submitted", detail: "MoU for Plastic/PET", time: "1 day ago" },
@@ -24,8 +18,37 @@ const wasteBreakdown = [
   { type: "Electronic", quantity: 177, color: "bg-red-500" },
 ];
 
+function formatTimeAgo(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hours ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} days ago`;
+}
+
 export function DashboardOverview() {
   const [co2Counter, setCo2Counter] = useState(3416);
+  const { data: activity = [] } = useActivityLog(10);
+  const { data: inventory = [] } = useInventory(true);
+  const { data: requests = [] } = useBusinessRequests(true);
+  const { data: orders = [] } = useOrders(true);
+
+  const recentActivity = useMemo(() => {
+    const fromDb = activity.map((a) => ({
+      action: a.action,
+      detail: a.detail ?? "",
+      time: formatTimeAgo(a.created_at),
+    }));
+    return fromDb.length > 0 ? fromDb : MOCK_ACTIVITY;
+  }, [activity]);
+
+  const totalWasteFromDb = useMemo(() =>
+    inventory.reduce((acc, i) => acc + Number(i.quantity), 0),
+  [inventory]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,6 +58,12 @@ export function DashboardOverview() {
   }, []);
 
   const totalWaste = wasteBreakdown.reduce((acc, item) => acc + item.quantity, 0);
+  const metrics = useMemo(() => [
+    { label: "Total Waste Available", value: totalWasteFromDb > 0 ? `${totalWasteFromDb.toLocaleString()} MT` : "2,847 MT", icon: Package, trend: "+12%" },
+    { label: "Active Matches", value: String(requests.length > 0 ? requests.length : 24), icon: Users, trend: "+3" },
+    { label: "CO₂ Diverted", value: `${co2Counter.toLocaleString()} MT`, icon: Leaf, trend: "+156 MT" },
+    { label: "Revenue Generated", value: "₹4.2 Cr", icon: TrendingUp, trend: "+18%" },
+  ], [totalWasteFromDb, requests.length, co2Counter]);
 
   return (
     <div className="space-y-8 animate-fade-in">

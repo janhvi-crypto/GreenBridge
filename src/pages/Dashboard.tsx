@@ -1,16 +1,21 @@
+import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
+
+
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   ShoppingCart,
-  Search, 
-  Calculator, 
+  Search,
+  Calculator,
   Package,
-  FileText, 
+  FileText,
   TrendingUp,
   Settings,
   Menu,
   LogOut,
-  X
+  X,
+  Store,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -20,6 +25,7 @@ import { ROICalculator } from "@/components/dashboard/ROICalculator";
 import { OrderManagement } from "@/components/dashboard/OrderManagement";
 import { GovHub } from "@/components/dashboard/GovHub";
 import { ImpactDashboard } from "@/components/dashboard/ImpactDashboard";
+import { PublishProduct } from "@/components/dashboard/PublishProduct";
 import { AccountSettings } from "@/components/dashboard/AccountSettings";
 
 const navItems = [
@@ -28,6 +34,7 @@ const navItems = [
   { id: "matching", label: "Matching Engine", icon: Search },
   { id: "calculator", label: "ROI Calculator", icon: Calculator },
   { id: "orders", label: "Order Management", icon: Package },
+  { id: "publish", label: "Publish Product", icon: Store },
   { id: "govhub", label: "Gov Collaboration", icon: FileText },
   { id: "impact", label: "Impact Dashboard", icon: TrendingUp },
   { id: "settings", label: "Account & Settings", icon: Settings },
@@ -38,10 +45,31 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data } = await supabase.auth.getUser();
 
-  const handleLogout = () => {
-    navigate("/");
+      if (!data.user) {
+        navigate("/login");
+        return;
+      }
+
+      const role = data.user.user_metadata?.role ?? data.user.role;
+      if (role !== "business") {
+        navigate("/login");
+      }
+    };
+
+    checkAccess();
+  }, [navigate]);
+  
+  
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
   };
+  
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
@@ -62,6 +90,8 @@ export default function Dashboard() {
         return <OrderManagement />;
       case "govhub":
         return <GovHub />;
+      case "publish":
+        return <PublishProduct />;
       case "impact":
         return <ImpactDashboard />;
       case "settings":

@@ -1,89 +1,20 @@
-import { useState } from "react";
-import { Package, Truck, CheckCircle, Clock, MapPin, FileText, RefreshCw } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Package, Truck, CheckCircle, Clock, MapPin, FileText, RefreshCw, QrCode } from "lucide-react";
+import { useOrders } from "@/hooks/useDashboardData";
+import * as api from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
-const activeOrders = [
-  {
-    id: "ORD-2847",
-    material: "Reclaimed Wood",
-    quantity: "75 MT",
-    status: "in_transit",
-    supplier: "Delhi MCD",
-    deliveryDate: "Feb 15, 2026",
-    amount: "₹13.5L",
-    progress: 65,
-    driver: "Ramesh Kumar",
-    eta: "2 days",
-  },
-  {
-    id: "ORD-2846",
-    material: "Metal / Steel",
-    quantity: "50 MT",
-    status: "processing",
-    supplier: "Haryana PWD",
-    deliveryDate: "Feb 20, 2026",
-    amount: "₹10.0L",
-    progress: 35,
-    driver: "Pending Assignment",
-    eta: "7 days",
-  },
-  {
-    id: "ORD-2845",
-    material: "Plastic / PET",
-    quantity: "100 MT",
-    status: "quality_check",
-    supplier: "Delhi MCD",
-    deliveryDate: "Feb 10, 2026",
-    amount: "₹18.0L",
-    progress: 85,
-    driver: "Suresh Patel",
-    eta: "1 day",
-  },
+const MOCK_ACTIVE = [
+  { id: "ORD-2847", material: "Reclaimed Wood", quantity: "75 MT", status: "in_transit", supplier: "Delhi MCD", deliveryDate: "Feb 15, 2026", amount: "₹13.5L", progress: 65, driver: "Ramesh Kumar", eta: "2 days" },
+  { id: "ORD-2846", material: "Metal / Steel", quantity: "50 MT", status: "processing", supplier: "Haryana PWD", deliveryDate: "Feb 20, 2026", amount: "₹10.0L", progress: 35, driver: "Pending Assignment", eta: "7 days" },
 ];
-
-const orderHistory = [
-  {
-    id: "ORD-2840",
-    material: "Construction Debris",
-    quantity: "200 MT",
-    status: "delivered",
-    date: "Jan 28, 2026",
-    amount: "₹20.0L",
-  },
-  {
-    id: "ORD-2835",
-    material: "Textile / Fabric",
-    quantity: "60 MT",
-    status: "delivered",
-    date: "Jan 15, 2026",
-    amount: "₹9.0L",
-  },
-  {
-    id: "ORD-2830",
-    material: "Reclaimed Wood",
-    quantity: "45 MT",
-    status: "delivered",
-    date: "Jan 5, 2026",
-    amount: "₹8.1L",
-  },
+const MOCK_HISTORY = [
+  { id: "ORD-2840", material: "Construction Debris", quantity: "200 MT", status: "delivered", date: "Jan 28, 2026", amount: "₹20.0L" },
+  { id: "ORD-2835", material: "Textile / Fabric", quantity: "60 MT", status: "delivered", date: "Jan 15, 2026", amount: "₹9.0L" },
 ];
-
 const recurringOrders = [
-  {
-    material: "Plastic / PET",
-    quantity: "50 MT",
-    frequency: "Monthly",
-    nextDelivery: "Mar 1, 2026",
-    discount: "10%",
-    active: true,
-  },
-  {
-    material: "Reclaimed Wood",
-    quantity: "30 MT",
-    frequency: "Bi-weekly",
-    nextDelivery: "Feb 14, 2026",
-    discount: "15%",
-    active: true,
-  },
+  { material: "Plastic / PET", quantity: "50 MT", frequency: "Monthly", nextDelivery: "Mar 1, 2026", discount: "10%", active: true },
+  { material: "Reclaimed Wood", quantity: "30 MT", frequency: "Bi-weekly", nextDelivery: "Feb 14, 2026", discount: "15%", active: true },
 ];
 
 const statusConfig = {
@@ -94,7 +25,76 @@ const statusConfig = {
 };
 
 export function OrderManagement() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"active" | "history" | "recurring">("active");
+  const [invoiceModal, setInvoiceModal] = useState<{ orderId: string; amount: string; material: string; supplier: string } | null>(null);
+  const [qrModal, setQrModal] = useState<{ orderId: string; payload: string } | null>(null);
+  const [invoiceResult, setInvoiceResult] = useState<api.InvoiceResult | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { data: myOrders = [] } = useOrders(true);
+  const activeOrders = useMemo(() => {
+    const active = myOrders.filter((o) => o.status !== "delivered").map((o) => ({
+      id: o.id,
+      material: o.material_type,
+      quantity: o.quantity,
+      status: o.status,
+      supplier: o.supplier ?? "Government",
+      deliveryDate: o.delivery_date ?? "—",
+      amount: o.amount ?? "—",
+      progress: o.progress ?? 0,
+      driver: "—",
+      eta: "—",
+    }));
+    return active.length > 0 ? active : MOCK_ACTIVE;
+  }, [myOrders]);
+  const orderHistory = useMemo(() => {
+    const delivered = myOrders.filter((o) => o.status === "delivered").map((o) => ({
+      id: o.id,
+      material: o.material_type,
+      quantity: o.quantity,
+      status: "delivered" as const,
+      date: o.updated_at.slice(0, 10),
+      amount: o.amount ?? "—",
+    }));
+    return delivered.length > 0 ? delivered : MOCK_HISTORY;
+  }, [myOrders]);
+
+  const handleInvoice = async (order: { id: string; material: string; amount: string; supplier?: string }) => {
+    setInvoiceModal({ orderId: order.id, amount: order.amount, material: order.material, supplier: order.supplier ?? "Government" });
+    setInvoiceResult(null);
+    setLoading(true);
+    try {
+      const res = await api.generateInvoice({
+        orderId: order.id,
+        amount: order.amount,
+        items: [{ material: order.material, quantity: "-" }],
+        supplier: order.supplier ?? "Government",
+      });
+      setInvoiceResult(res);
+    } catch (e) {
+      toast({ title: "Invoice failed", description: e instanceof Error ? e.message : "Is the API server running? (npm run api)", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQr = async (order: { id: string; material: string; quantity: string }) => {
+    setQrModal({ orderId: order.id, payload: JSON.stringify({ type: "order", id: order.id, material: order.material, quantity: order.quantity }) });
+    setQrDataUrl(null);
+    setLoading(true);
+    try {
+      const res = await api.generateQR({
+        payload: { type: "order", id: order.id, material: order.material, quantity: order.quantity },
+        size: 256,
+      });
+      setQrDataUrl(res.qrDataUrl);
+    } catch (e) {
+      toast({ title: "QR failed", description: e instanceof Error ? e.message : "Is the API server running? (npm run api)", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -186,8 +186,17 @@ export function OrderManagement() {
                     <button className="btn-outline-elegant text-xs px-3 py-1">
                       <MapPin className="w-3 h-3 mr-1" /> Track
                     </button>
-                    <button className="btn-outline-elegant text-xs px-3 py-1">
+                    <button
+                      onClick={() => handleInvoice({ id: order.id, material: order.material, amount: order.amount, supplier: order.supplier })}
+                      className="btn-outline-elegant text-xs px-3 py-1"
+                    >
                       <FileText className="w-3 h-3 mr-1" /> Invoice
+                    </button>
+                    <button
+                      onClick={() => handleQr({ id: order.id, material: order.material, quantity: order.quantity })}
+                      className="btn-outline-elegant text-xs px-3 py-1"
+                    >
+                      <QrCode className="w-3 h-3 mr-1" /> QR
                     </button>
                   </div>
                 </div>
@@ -220,6 +229,12 @@ export function OrderManagement() {
                   <td className="p-4 font-body text-sm text-cream/60">{order.date}</td>
                   <td className="p-4 font-display text-cream">{order.amount}</td>
                   <td className="p-4">
+                    <button
+                      onClick={() => handleInvoice({ id: order.id, material: order.material, amount: order.amount })}
+                      className="btn-outline-elegant text-xs px-3 py-1 mr-1"
+                    >
+                      <FileText className="w-3 h-3 mr-1 inline" /> Invoice
+                    </button>
                     <button className="btn-outline-elegant text-xs px-3 py-1">
                       Reorder
                     </button>
@@ -228,6 +243,42 @@ export function OrderManagement() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Invoice Modal */}
+      {invoiceModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setInvoiceModal(null)}>
+          <div className="glass-card p-6 max-w-md w-full animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display text-xl text-cream mb-4">Invoice</h3>
+            {loading && <p className="text-cream/60 text-sm">Generating...</p>}
+            {invoiceResult && (
+              <div className="space-y-3 text-sm">
+                <p><span className="text-cream/60">Order:</span> {invoiceResult.orderId}</p>
+                <p><span className="text-cream/60">Amount:</span> {invoiceResult.amount}</p>
+                <p><span className="text-cream/60">Date:</span> {invoiceResult.date}</p>
+                <p><span className="text-cream/60">Supplier:</span> {invoiceResult.supplier}</p>
+                {invoiceResult.invoiceImageUrl && (
+                  <a href={invoiceResult.invoiceImageUrl} target="_blank" rel="noreferrer" className="text-green-400 underline">View invoice image</a>
+                )}
+                <p className="text-cream/50 text-xs mt-2">{invoiceResult.message}</p>
+              </div>
+            )}
+            <button onClick={() => setInvoiceModal(null)} className="btn-outline-elegant w-full mt-4">Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* QR Modal */}
+      {qrModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setQrModal(null)}>
+          <div className="glass-card p-6 max-w-sm w-full animate-scale-in text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display text-xl text-cream mb-4">Order QR Code</h3>
+            {loading && <p className="text-cream/60 text-sm">Generating...</p>}
+            {qrDataUrl && <img src={qrDataUrl} alt="QR" className="w-48 h-48 mx-auto rounded-lg bg-white p-2" />}
+            <p className="font-mono text-xs text-cream/60 mt-3 break-all">{qrModal?.orderId}</p>
+            <button onClick={() => setQrModal(null)} className="btn-outline-elegant w-full mt-4">Close</button>
+          </div>
         </div>
       )}
 

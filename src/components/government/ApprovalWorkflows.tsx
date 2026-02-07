@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileCheck, Clock, CheckCircle, XCircle, Pen, Eye, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const pendingMOUs = [
   {
@@ -54,7 +55,30 @@ const pendingCertifications = [
 ];
 
 export function ApprovalWorkflows() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"mous" | "certifications">("mous");
+  const [signingId, setSigningId] = useState<string | null>(null);
+
+  const handleSignAndApprove = async (mouId: string, company: string) => {
+    const ethereum = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) {
+      toast({ title: "No wallet", description: "Install MetaMask to sign (Ethereum).", variant: "destructive" });
+      return;
+    }
+    setSigningId(mouId);
+    try {
+      const accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[];
+      if (!accounts?.[0]) throw new Error("No account");
+      const message = `I approve ${mouId} (${company}) for GreenBridge. Signed at ${new Date().toISOString()}`;
+      const hexMessage = "0x" + Array.from(new TextEncoder().encode(message)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      await ethereum.request({ method: "personal_sign", params: [hexMessage, accounts[0]] });
+      toast({ title: "Signed & approved", description: `${mouId} signed with ${accounts[0].slice(0, 8)}...` });
+    } catch (e) {
+      toast({ title: "Sign failed", description: e instanceof Error ? e.message : "Wallet denied.", variant: "destructive" });
+    } finally {
+      setSigningId(null);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -195,8 +219,12 @@ export function ApprovalWorkflows() {
                 <button className="btn-outline-elegant text-xs text-yellow-400 border-yellow-400/30">
                   Request Changes
                 </button>
-                <button className="btn-elegant text-xs">
-                  <Pen className="w-3 h-3 mr-1" /> Sign & Approve
+                <button
+                  className="btn-elegant text-xs disabled:opacity-50"
+                  disabled={signingId === mou.id}
+                  onClick={() => handleSignAndApprove(mou.id, mou.company)}
+                >
+                  <Pen className="w-3 h-3 mr-1" /> {signingId === mou.id ? "Signing…" : "Sign & Approve (Ethereum)"}
                 </button>
               </div>
             </div>
