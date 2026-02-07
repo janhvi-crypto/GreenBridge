@@ -12,7 +12,14 @@ import {
   ArrowLeft,
   QrCode,
   Award,
-  TrendingDown
+  TrendingDown,
+  Trash2,
+  Apple,
+  Newspaper,
+  Zap,
+  Droplets,
+  CheckCircle2,
+  ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -437,6 +444,193 @@ export default function ConsumerMarketplace() {
                 <Award className="w-4 h-4" />
                 <span className="text-sm">Certified Eco-Friendly</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Waste Segregation Awareness Section */}
+      <section className="py-16 md:py-20 bg-gradient-to-b from-background to-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 mb-4">
+              <Trash2 className="w-3 h-3 mr-1" />
+              Be Part of the Solution
+            </Badge>
+            <h2 className="font-display text-3xl md:text-4xl text-foreground mb-4 italic">
+              It Starts at Your Home
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Proper waste segregation at source makes recycling possible. 
+              Learn how your simple daily actions can help clear Delhi's landfills.
+            </p>
+          </div>
+
+          {/* Segregation Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-4">
+                  <Apple className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-display text-xl mb-2 text-green-800 dark:text-green-400">Wet Waste</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Kitchen scraps, food leftovers, vegetable peels, fruit waste
+                </p>
+                <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-3">
+                  <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+                    → Becomes organic compost
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mx-auto mb-4">
+                  <Newspaper className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-display text-xl mb-2 text-blue-800 dark:text-blue-400">Dry Waste</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Paper, cardboard, plastic bottles, metal cans, glass
+                </p>
+                <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3">
+                  <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">
+                    → Recycled into new products
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-display text-xl mb-2 text-red-800 dark:text-red-400">E-Waste</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Batteries, electronics, cables, mobile phones, chargers
+                </p>
+                <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-3">
+                  <p className="text-xs text-red-700 dark:text-red-400 font-medium">
+                    → Safe disposal & recovery
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center mx-auto mb-4">
+                  <Droplets className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-display text-xl mb-2 text-amber-800 dark:text-amber-400">Hazardous</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Medicines, chemicals, paints, cleaning products
+                </p>
+                <div className="bg-amber-100 dark:bg-amber-900/30 rounded-lg p-3">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                    → Special treatment required
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Why Segregation Matters */}
+          <div className="bg-card rounded-2xl border border-border p-8 md:p-10">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="font-display text-2xl md:text-3xl mb-6 text-foreground italic">
+                  Why Your Action Matters
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground">Reduces Landfill Burden</p>
+                      <p className="text-sm text-muted-foreground">
+                        Segregated waste means 60% less goes to landfills
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground">Enables Recycling</p>
+                      <p className="text-sm text-muted-foreground">
+                        Clean, sorted waste can become products you buy here
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground">Creates Jobs</p>
+                      <p className="text-sm text-muted-foreground">
+                        Supports waste workers and circular economy businesses
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-foreground">Saves the Environment</p>
+                      <p className="text-sm text-muted-foreground">
+                        Reduces greenhouse emissions and soil contamination
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-forest-dark to-forest-medium rounded-xl p-6 text-cream">
+                <h4 className="font-display text-xl mb-4 italic">Your Impact Potential</h4>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-cream/20 pb-3">
+                    <span className="text-cream/70">If you segregate for 1 year:</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <p className="font-display text-3xl text-green-400">365 kg</p>
+                      <p className="text-xs text-cream/60">Waste properly sorted</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-display text-3xl text-green-400">219 kg</p>
+                      <p className="text-xs text-cream/60">Diverted from landfill</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-display text-3xl text-green-400">263 kg</p>
+                      <p className="text-xs text-cream/60">CO₂ emissions avoided</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-display text-3xl text-green-400">12</p>
+                      <p className="text-xs text-cream/60">Trees worth of impact</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-cream/20">
+                    <p className="text-sm text-cream/80 text-center">
+                      Join 8,200+ conscious citizens making a difference
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground mb-6">
+              Start segregating today. Buy eco-products. Close the loop.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button className="bg-forest-dark hover:bg-forest-medium text-cream">
+                Download Segregation Guide
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button variant="outline">
+                Find Collection Centers Near You
+              </Button>
             </div>
           </div>
         </div>
